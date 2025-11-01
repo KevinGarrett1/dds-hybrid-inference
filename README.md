@@ -68,8 +68,7 @@ Quantify provocational and emotional tone using a deterministic ML model fine-tu
 
 Example Output
 
-```
-json
+```json
 {
   "prov_risk": 0.94,
   "breakdown": {
@@ -93,8 +92,7 @@ Purpose: Merge LLM output and ML features into a unified schema for downstream s
 
 Example Merged Object
 
-```
-json
+```json
 {
   "incident_type": "bomb_threat",
   "location": "Refinery #12, East Lot",
@@ -151,8 +149,7 @@ The HP model aggregates these features and routes the event for human review to 
 6. Final Output — Interpretable and Actionable
 Unified Scoring Example
 
-```
-json
+```json
 {
   "incident_type": "bomb_threat",
   "prov_risk": 0.94,
