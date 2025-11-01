@@ -68,9 +68,8 @@ Quantify provocational and emotional tone using a deterministic ML model fine-tu
 
 Example Output
 
-json
-Copy code
 ```
+json
 {
   "prov_risk": 0.94,
   "breakdown": {
@@ -96,7 +95,6 @@ Example Merged Object
 
 ```
 json
-Copy code
 {
   "incident_type": "bomb_threat",
   "location": "Refinery #12, East Lot",
@@ -120,16 +118,15 @@ Owner: Kevin
 Purpose
 Compute the final Hoax Probability (HP) and assign severity.
 
-Core Equation
+**Core Equation**
 
-ini
-Copy code
+```ini
 HP = σ(θ₀ + θ_type + Σ w_g × G_g)
+```
+
 Example Output
 
-```
-json
-Copy code
+```json
 {
   "hp": 0.81,
   "severity": "high",
@@ -141,6 +138,7 @@ Copy code
   ]
 }
 ```
+
 
 Interpretation
 
@@ -155,7 +153,6 @@ Unified Scoring Example
 
 ```
 json
-Copy code
 {
   "incident_type": "bomb_threat",
   "prov_risk": 0.94,
