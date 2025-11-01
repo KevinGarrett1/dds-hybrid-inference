@@ -268,7 +268,4 @@ Machine Learning and AI Engineering Intern
 Deep Defense Solutions
 Last updated: November 2025
 
-yaml
-Copy code
 
----
