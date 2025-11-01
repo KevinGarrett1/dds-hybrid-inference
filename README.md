@@ -50,6 +50,7 @@ The LLM interprets and structures messy input text into standardized JSON fields
   "reported_weapons": "quantum device (verbal claim)",
   "reporter_tone": "hostile / fearful"
 }
+```
 Integration Notes
 
 The LLM handles semantic understanding and context extraction.
@@ -69,6 +70,7 @@ Example Output
 
 json
 Copy code
+```
 {
   "prov_risk": 0.94,
   "breakdown": {
@@ -77,6 +79,7 @@ Copy code
     "group_targeting": 0.96
   }
 }
+```
 Why It Matters
 
 Converts hate-filled or panic-driven language into a measurable value.
@@ -91,6 +94,7 @@ Purpose: Merge LLM output and ML features into a unified schema for downstream s
 
 Example Merged Object
 
+```
 json
 Copy code
 {
@@ -100,6 +104,7 @@ Copy code
   "suspect_description": "...",
   "reported_weapons": "quantum device (verbal claim)"
 }
+```
 Integration Logic
 
 Acts as the interface between GPT output and ML processing.
@@ -122,6 +127,7 @@ Copy code
 HP = σ(θ₀ + θ_type + Σ w_g × G_g)
 Example Output
 
+```
 json
 Copy code
 {
@@ -134,6 +140,8 @@ Copy code
     {"feature": "lack_of_corroboration", "value": 0.8}
   ]
 }
+```
+
 Interpretation
 
 Harshita’s rules flag a high-urgency bomb threat.
@@ -145,6 +153,7 @@ The HP model aggregates these features and routes the event for human review to 
 6. Final Output — Interpretable and Actionable
 Unified Scoring Example
 
+```
 json
 Copy code
 {
@@ -155,6 +164,8 @@ Copy code
   "route": "verify_and_alert",
   "summary": "High-severity bomb threat containing extreme bias language. Likely hoax but requires immediate SOC validation."
 }
+```
+
 Routing Options
 
 Verify and Alert: Analyst review within SOC.
@@ -266,3 +277,4 @@ Last updated: November 2025
 yaml
 Copy code
 
+---
