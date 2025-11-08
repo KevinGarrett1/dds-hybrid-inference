@@ -1,271 +1,160 @@
-# DDS Hybrid Inference Pipelines  
-### Illustrated with a Hostile Hoax Report  
+# DDS Hybrid Inference System  
+### Fine-Tuned ML + GPT Integration for Incident Credibility Scoring  
+
+**Author:** Kevin Garrett — Machine Learning & AI Engineering  
+**Last Updated:** November 2025  
 
 ---
 
 ## Purpose  
-This README explains how the **DDS Hybrid Inference Pipeline** integrates Harshita’s GPT-based extraction service with the ML scoring layer using the `prov_risk` feature as an example.  
-It demonstrates how the system interprets natural language, quantifies tone, and calculates a reproducible hoax probability.
+
+The **DDS Hybrid Inference System** is a modular AI pipeline that combines language understanding with measurable inference.  
+It was designed to evaluate the credibility of incident reports by blending **LLM-based interpretation** and **deterministic ML scoring** into one reproducible workflow.
+
+Where most systems choose between generative reasoning or classical models, this architecture integrates both:
+
+- **LLM Extraction Layer** — interprets and structures free text into standardized JSON.  
+- **ML Feature Layer** — converts tone and phrasing into numeric features that can be tested, audited, and recalibrated.  
+
+The outcome is a **Hoax Probability (HP)** score — a quantitative measure of whether an incident is exaggerated, hostile, or fabricated.
 
 ---
 
-## Overview  
-The DDS Hoax Reporting System combines **LLM reasoning** and **ML precision** into a single pipeline.
+## System Context  
 
-- **LLM Layer** handles unstructured text, extracting entities, context, and meaning.  
-- **ML Feature Layer** quantifies tone, hostility, and other measurable signals.  
-- **HP v1.6 Logistic Model** aggregates all numeric features into a calibrated probability score.
+This repository represents one **Hybrid Inference module** inside the **DDS Enterprise Incident Platform**.
 
-This design keeps Harshita’s GPT-4o logic intact while adding deterministic, auditable ML scoring aligned with MIT Press and enterprise AI best practices.
+| Platform Layer | Description |
+|----------------|--------------|
+| Client / Orchestration | Handles report intake and routes data to model endpoints. |
+| Hybrid Inference (this repo) | Extracts and scores linguistic, emotional, and contextual signals. |
+| Adjudication | Aggregates model outputs into calibrated probabilities. |
+| Audit & Human Review | Provides explainability and bias tracking. |
 
----
-
-## 1. Input Layer — The Raw Report  
-**Role:** Collect unverified text or OCR data from users or monitoring sources.
-
-**Example**  
-> “Those filthy marsheads are back at the refinery. The three-finger freaks keep waving their antenna things like they’re casting spells. They hate humans and they said they’ll ‘quantum blow this place sky-high.’ Management ignores it, but if those creatures stay, somebody’s getting vaporized.”
-
-**Challenge**  
-Free-form language mixes fear, rumor, and bias. It must be structured and quantified before any decision logic can be applied.
+Each module in this layer follows the same design pattern:  
+**Interpret → Quantify → Validate → Aggregate.**
 
 ---
 
-## 2. LLM Layer — Harshita’s GPT Extraction Service  
-**File:** `gpt_incident_agent.py`  
-**Owner:** Harshita  
-**Model:** GPT-4o (OpenAI API)
-
-**Purpose**  
-The LLM interprets and structures messy input text into standardized JSON fields that downstream ML models can process.
-
-**Example Output**
-```json
-{
-  "incident_id": "rpt-20251102-019",
-  "incident_type": "bomb_threat",
-  "location": "Refinery #12, East Lot",
-  "text": "Those filthy marsheads ... vaporized.",
-  "suspect_description": "group referred to as 'marsheads', three-fingered, with antennae",
-  "reported_weapons": "quantum device (verbal claim)",
-  "reporter_tone": "hostile / fearful"
-}
-```
-Integration Notes
-
-The LLM handles semantic understanding and context extraction.
-
-It does not assign numeric scores, which prevents non-deterministic outputs.
-
-Output is passed directly to the ML feature layer for measurable evaluation.
-
-3. ML Feature Layer — prov_risk Module
-File: prov_risk_inference.py
-Owner: Kevin
-
-Purpose
-Quantify provocational and emotional tone using a deterministic ML model fine-tuned on the HateXplain dataset.
-
-Example Output
-
-```json
-{
-  "prov_risk": 0.94,
-  "breakdown": {
-    "keyword_intensity": 0.91,
-    "panic_level": 0.89,
-    "group_targeting": 0.96
-  }
-}
-```
-Why It Matters
-
-Converts hate-filled or panic-driven language into a measurable value.
-
-Produces identical results for identical input, guaranteeing reproducibility.
-
-Creates a consistent numeric foundation for the HP scoring layer.
-
-4. Bridge Layer — Data Unification
-File: bridge_prov_risk.py
-Purpose: Merge LLM output and ML features into a unified schema for downstream scoring.
-
-Example Merged Object
-
-```json
-{
-  "incident_type": "bomb_threat",
-  "location": "Refinery #12, East Lot",
-  "prov_risk": 0.94,
-  "suspect_description": "...",
-  "reported_weapons": "quantum device (verbal claim)"
-}
-```
-Integration Logic
-
-Acts as the interface between GPT output and ML processing.
-
-Validates fields and enforces schema consistency.
-
-Ensures data compatibility for the logistic scoring model.
-
-5. HP v1.6 Logistic Model — Final Scoring
-File: hp_model_v16.py
-Owner: Kevin
-
-Purpose
-Compute the final Hoax Probability (HP) and assign severity.
-
-**Core Equation**
-
-```ini
-HP = σ(θ₀ + θ_type + Σ w_g × G_g)
-```
-
-Example Output
-
-```json
-{
-  "hp": 0.81,
-  "severity": "high",
-  "route": "SOC urgent review",
-  "contributors_top3": [
-    {"feature": "prov_risk", "value": 0.94},
-    {"feature": "weapon_claim", "value": 1.0},
-    {"feature": "lack_of_corroboration", "value": 0.8}
-  ]
-}
-```
+## Architecture Overview  
+Input Report → LLM Extraction → ML Feature Scoring → HP Logistic Model → Human Review
 
 
-Interpretation
+### Layers  
 
-Harshita’s rules flag a high-urgency bomb threat.
+1. **Input Layer** – Collects unstructured text or OCR input.  
+2. **LLM Extraction Layer** – Parses and structures the narrative (incident type, entities, tone).  
+3. **ML Feature Layer** – Scores measurable attributes such as provocation, panic, and keyword intensity.  
+4. **Bridge Layer** – Validates schema and merges all numeric features.  
+5. **HP Model (v1.6)** – Aggregates weighted scores into a single probability.  
+6. **Audit Layer** – Logs results for retraining and compliance review.  
 
-The prov_risk model confirms extreme hostile tone.
+---
 
-The HP model aggregates these features and routes the event for human review to prevent false escalation.
+## Current Implementation  
 
-6. Final Output — Interpretable and Actionable
-Unified Scoring Example
+### Completed Features (Built & Trained)  
 
-```json
-{
-  "incident_type": "bomb_threat",
-  "prov_risk": 0.94,
-  "hp": 0.81,
-  "severity": "high",
-  "route": "verify_and_alert",
-  "summary": "High-severity bomb threat containing extreme bias language. Likely hoax but requires immediate SOC validation."
-}
-```
+| Feature | Purpose | Model Type | Dataset |
+|----------|----------|-------------|----------|
+| **prov_risk** | Detects provocational or hate-driven tone | Fine-tuned BERT / Logistic Regression | HateXplain |
+| **panic_level** | Detects fear or panic intensity in language | Fine-tuned RoBERTa | GoEmotions + HateXplain |
 
-Routing Options
+These models form the **Linguistic Pattern Group** of the DDS G-Pattern family — the emotional and tonal foundation of the HP scoring pipeline.
 
-Verify and Alert: Analyst review within SOC.
+---
 
-Escalate: Notify authorities if corroborated.
+## Training Summary (Colab Build)
 
-Archive: Record for retraining and calibration if confirmed false.
+The **panic_level** model was trained and validated in Google Colab using the following workflow:
 
-LLM and ML Roles in the DDS Hybrid Architecture
-The DDS architecture uses two intelligence layers that complement each other.
-The LLM layer understands language.
-The ML layer measures and scores it.
-This separation keeps the system smart, stable, and accountable.
+1. **Dataset Integration** – Loaded and merged GoEmotions + HateXplain datasets, unified labels into a binary `panic_label`.  
+2. **Fine-Tuning** – Trained `roberta-base` for three epochs using AdamW (`2e-5` LR, batch size `16`).  
+3. **Exported Model Assets** – `config.json`, `tokenizer.json`, `vocab.json`, `merges.txt`, `model.safetensors`.  
+4. **Batched Inference** – Generated `panic_level_features.csv` using GPU batching for speed.  
+5. **Schema Validation** – Confirmed feature compliance with DDS incident schema v1.  
+6. **Drive Storage** – Saved model under `/MyDrive/DDS_Models/panic_level_model/` for orchestration integration.  
 
-LLM Role — Interpretive Intelligence
-File: gpt_incident_agent.py
-Owner: Harshita
-Model: GPT-4o
+This process now serves as the standard pattern for future DDS text-based feature builds.
 
-Purpose
-The LLM interprets unstructured text and extracts structured information such as incident type, location, tone, and key entities.
+---
 
-Function	Description
-Context Extraction	Identifies key details about the event.
-Entity Detection	Finds names, objects, or places.
-Tone Tagging	Detects fear, anger, or hostility.
-Normalization	Produces clean, consistent JSON output.
+## Repository Structure  
 
-Why It Matters
-GPT models are powerful interpreters but inconsistent for scoring.
-Keeping them focused on understanding rather than judgment ensures the pipeline stays reliable.
+dds/
+├── features/
+│ ├── prov_risk/
+│ │ ├── prov_risk_model.py
+│ │ ├── prov_risk_inference.py
+│ │ └── prov_risk_bridge.py
+│ ├── panic_level/
+│ │ ├── config.json
+│ │ ├── merges.txt
+│ │ ├── vocab.json
+│ │ ├── tokenizer.json
+│ │ ├── tokenizer_config.json
+│ │ ├── special_tokens_map.json
+│ │ └── model.safetensors ← stored in Drive (not GitHub)
+│ └── keyword_intensity/ ← planned for HP v1.7
+├── validation_log.txt
+├── venv/
+└── README.md
 
-Key Idea: The LLM reads between the lines and gives structure to language.
 
-ML Role — Quantitative Intelligence
-Files: prov_risk_inference.py, hp_model_v16.py
-Owner: Kevin
+---
 
-Purpose
-The ML layer converts structured text from the LLM into numeric features. It measures emotional tone, risk, and intensity, then aggregates those signals into a probability score.
+## Model Details — Panic Level (RoBERTa Fine-Tune)
 
-Function	Description
-Feature Quantification	Converts tone and phrasing into numeric values.
-Reproducible Scoring	Guarantees stable, identical results for the same input.
-Calibration	Uses real datasets for accuracy and bias control.
-Aggregation	Combines multiple features into a final probability.
+| Setting | Value |
+|----------|--------|
+| Base model | roberta-base |
+| Architecture | RobertaForSequenceClassification (binary) |
+| Epochs | 3 |
+| Batch size | 16 |
+| Learning rate | 2 × 10⁻⁵ |
+| Optimizer | AdamW |
+| Dropout | 0.1 |
+| Hidden size | 768 |
+| Final loss | Train ≈ 0.08 / Val ≈ 0.16 |
 
-Why It Matters
-This layer grounds the system in math.
-It produces scores that can be tested, audited, and recalibrated.
-It provides the reproducibility that LLMs lack.
+---
 
-Key Idea: The ML layer measures the lines and turns words into numbers.
+## Integration Summary  
 
-Combined Workflow
-Step	Component	Type	Responsibility
-1	LLM (GPT-4o)	Interpretive	Reads and structures text.
-2	ML Features	Quantitative	Converts tone into numeric scores.
-3	HP Logistic Model	Decision	Aggregates results into a final probability.
+| Layer | Input | Output | Responsibility |
+|--------|--------|--------|----------------|
+| LLM Extraction | Raw report text | Structured JSON | Parsing / context understanding |
+| prov_risk Model | Structured text | `prov_risk ∈ [0, 1]` | Hostility quantification |
+| panic_level Model | Structured text | `panic_level ∈ [0, 1]` | Emotional intensity quantification |
+| Bridge | Feature merge | Unified schema | Validation / standardization |
+| HP Model | Numeric features | Hoax Probability ∈ [0, 1] | Aggregation & routing logic |
 
-Process Summary
+---
 
-The LLM interprets what is said.
+## Next Phase — Integration & Expansion  
 
-The ML model quantifies how it is said.
+| Goal | Description |
+|------|--------------|
+| **Feature Expansion (HP v1.7)** | Add `keyword_intensity` (TF-IDF baseline) and `pattern_burst` (n-gram similarity). |
+| **Service Deployment** | Expose `panic_level` and `prov_risk` as REST microservices callable by the orchestration layer. |
+| **Model Registry Alignment** | Register model metadata (version, bias metrics, latency) in the DDS Model Registry. |
+| **Schema Automation** | Implement pre-export JSON schema validation hooks. |
+| **Hybrid Aggregation** | Combine panic and prov_risk scores as a composite G-Pattern signal. |
+| **Recalibration Pipeline** | Add periodic retraining and drift monitoring. |
 
-The HP model makes a decision based on data.
+---
 
-Why the Separation Matters
-Keeping the layers distinct ensures both intelligence and consistency.
-The LLM adds flexibility and understanding.
-The ML layer adds stability and accountability.
-Together they create a pipeline that is context-aware and scientifically grounded.
+## Compliance & Best Practices  
 
-Attribute	LLM Layer	ML Layer
-Strength	Handles unstructured language	Produces stable numeric outputs
-Limitation	Non-deterministic	Requires structured input
-Output	Structured JSON	Numeric scores and probabilities
-Example Files	gpt_incident_agent.py	prov_risk_inference.py, hp_model_v16.py
+This module aligns with enterprise AI reliability frameworks:  
 
-In short
-The LLM interprets meaning.
-The ML model quantifies it.
-The HP model decides what to do next.
+- *MIT Press (2024)* — *The Inherent Instability of LLMs*  
+- *IBM Responsible AI Framework (2023)*  
+- *Google Vertex AI Hybrid Pipelines (2024)*  
 
-End-to-End Summary
-Layer	File	Owner	Role	Determinism
-LLM Extraction	gpt_incident_agent.py	Harshita	Interpret and structure input	Controlled stochastic
-ML Feature	prov_risk_inference.py	Kevin	Quantify tone and hostility	Deterministic
-Bridge	bridge_prov_risk.py	Kevin	Merge JSON and features	Deterministic
-HP Logistic	hp_model_v16.py	Kevin	Aggregate and route	Deterministic
+Separating language understanding from numeric scoring ensures **interpretability, reproducibility, and traceable AI decision-making.**
 
-Compliance and Best Practices
-This architecture aligns with guidance from:
+---
 
-MIT Press (2024) The Inherent Instability of Large Language Models
-
-IBM Responsible AI Framework (2023)
-
-Google Cloud Vertex AI Hybrid Pipelines (2024)
-
-By separating LLM interpretation from ML scoring, DDS achieves reproducible, auditable, and trustworthy inference at enterprise scale.
-
-Author: Kevin Garrett
-Machine Learning and AI Engineering Intern
-Deep Defense Solutions
-Last updated: November 2025
 
 
